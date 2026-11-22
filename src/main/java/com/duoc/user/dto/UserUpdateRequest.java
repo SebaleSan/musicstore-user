@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import com.duoc.user.model.Role;
 
 public record UserUpdateRequest(
-    @NotBlank @Email @Size (max = 100)String email,
+    @NotBlank @Email(regexp = EmailFormat.REGEXP, message = EmailFormat.MESSAGE) @Size (max = 100)String email,
     @Size (min = 8, max = 100)String password,
     @NotNull Role role
 ) {
