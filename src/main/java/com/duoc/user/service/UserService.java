@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.duoc.user.dto.ProfileUpdateRequest;
+import com.duoc.user.dto.RegisterRequest;
 import com.duoc.user.dto.UserCreateRequest;
 import com.duoc.user.dto.UserResponse;
 import com.duoc.user.dto.UserUpdateRequest;
@@ -53,6 +55,34 @@ public class UserService {
             passwordEncoder.encode(request.password()),request.role()));
         log.info("Cuenta creada id={} rol={}",createdUser.getId(),createdUser.getRole());
         return UserResponse.fromEntity(createdUser);
+    }
+
+    @Transactional(readOnly=true)
+    public UserResponse findByUsername(String username) {
+        return UserResponse.fromEntity(getUserByUsername(username));
+    }
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(()->
+            new BusinessExceptionHandler(HttpStatus.NOT_FOUND,"Usuario no encontrado: "+username));
+    }
+
+    @Transactional
+    public UserResponse register(RegisterRequest request) {
+        return createUser(new UserCreateRequest(request.username(),request.email(),request.password(),Role.USER));
+    }
+
+    @Transactional
+    public UserResponse updateProfile(String username,ProfileUpdateRequest request) {
+        User actual=getUserByUsername(username);
+        String email=request.email().toLowerCase(Locale.ROOT);
+        if(!actual.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+            throw new BusinessExceptionHandler(HttpStatus.CONFLICT,"Correo ya registrado");
+        }
+        actual.setEmail(email);
+        if(request.password()!=null) actual.setPassword(passwordEncoder.encode(request.password()));
+        User saved=userRepository.save(actual);
+        log.info("Perfil actualizado id={}",saved.getId());
+        return UserResponse.fromEntity(saved);
     }
 
     @Transactional
