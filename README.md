@@ -147,4 +147,4 @@ El `Dockerfile` compila el proyecto con Maven y Java 21, y lo ejecuta en `eclips
 docker build -t musicstore-user:1.0 .
 ```
 
-La ejecución junto al frontend y al microservicio `album` se realiza con Docker Compose desde el repositorio `musicstore-deploy`.
+La ejecución junto al frontend y al microservicio `album` se realiza con Docker Compose desde la carpeta `Docker` de la entrega.
